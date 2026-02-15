@@ -9,6 +9,8 @@ public class UniversityTasks {
     public static int torch = 30;
     public static boolean isGameRunning = true;
 
+    public static String playerClass = "";
+
     public static char[][][] tower = {
 // === ЭТАЖ 0: "Обрыв" (5x6) ===
             {
@@ -36,6 +38,23 @@ public class UniversityTasks {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println("=*=**ВЫБЕРИТЕ КЛАСС**=*=");
+        System.out.println("(1) ВЗЛОМЩИК. Для вас X — это сложный замок, требующий тонкой работы.");
+        System.out.println("(2) КРУШИТЕЛЬ. Для вас X — это груда камней, которую можно разбить.");
+        System.out.println("(3) ТЕНЬ. Для вас X — это провал в полу. ");
+        System.out.print("выбери номер класса: ");
+
+        String choice = scanner.nextLine();
+
+        switch (choice){
+            case "1": playerClass = "Rogue"; break;
+            case "2": playerClass = "Brute"; break;
+            case "3": playerClass = "Shadow"; break;
+            default: playerClass = "Rogue";
+                System.out.println("вы ввели неверный класс, вам дали класс взломщика (по умолчанию)");
+        }
+        System.out.println("вы играете за " + playerClass);
+
         System.out.print("w/s/a/d ");
         while (isGameRunning) {
             printHud();
@@ -52,10 +71,19 @@ public class UniversityTasks {
             if (cmd == 'e') {
                 handleAction(scanner);
             }
+            else if (cmd == 'k' || cmd == 'b' || cmd == 'j'){
+            }
+
             else{
                 handleMove(cmd);
             }
         }
+    }
+
+    public static void handleAbility(Scanner scanner, char cmd){
+        // проверить соответствие класса с командой
+        // получить направление и в какую сторону она активируется
+        // если класс, то соответствующие действия
     }
 
     public static void handleMove(char dir){
@@ -140,18 +168,6 @@ public class UniversityTasks {
         }
         else{
             System.out.println("у нас нет лестницы");
-        }
-    }
-
-    public static void positionCheck(char[][][] tower){
-        char nextStepSign = tower[floor][playerY][playerX];
-
-        if (nextStepSign == '#') {
-            System.out.println("стена");
-        }
-
-        if (nextStepSign == '_') {
-            System.out.println("шаг");
         }
     }
 
