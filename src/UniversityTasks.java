@@ -48,7 +48,10 @@ public class UniversityTasks {
             else{
                 handleMove(cmd);
             }
-
+            if (torch == 0){
+                System.out.print("кажется факел потух и надежда угасла с ним ");
+                break;
+            }
         }
     }
 
@@ -68,16 +71,17 @@ public class UniversityTasks {
         switch (dir){
             case 'w':
                 System.out.println('w');
-                if (tower[floor][playerY - 1][playerX] == '_') {
+                if (tower[floor][playerY - 1][playerX] != '#') {
                     playerY -= 1;
-                    positionCheck(tower);
                     torch--;
+                    positionCheck(tower);
                 }
                 break;
             case 'a':
                 System.out.println('a');
                 if (tower[floor][playerY][playerX - 1] != '#') {
                     playerX -= 1;
+                    torch--;
                     positionCheck(tower);
                 }
                 break;
@@ -85,13 +89,15 @@ public class UniversityTasks {
                 System.out.println('s');
                 if (tower[floor][playerY + 1][playerX] != '#') {
                     playerY += 1;
+                    torch--;
                     positionCheck(tower);
                 }
                 break;
             case 'd':
                 System.out.println('d');
-                if (tower[floor][playerY][playerX + 1] != '#') {
+                if (tower[floor][playerY ][playerX + 1] != '#') {
                     playerX += 1;
+                    torch--;
                     positionCheck(tower);
                 }
                 break;
@@ -125,6 +131,12 @@ public class UniversityTasks {
             playerY = demoY;
             System.out.println("вы поднялись на этаж " + floor);
         }
+        if (tile == '+'){
+            playerY = demoY;
+            playerX = demoX;
+            torch = torch + 10;
+            System.out.println("вы подобрали факел, заряд увеличился на 10 ");
+        }
         else if (tile == 'D'){
             floor--;
             playerX = demoX;
@@ -134,6 +146,7 @@ public class UniversityTasks {
         else{
             System.out.println("у нас нет лестницы");
         }
+
 
     }
 
