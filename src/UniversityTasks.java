@@ -1,3 +1,4 @@
+import java.sql.Struct;
 import java.util.Scanner;
 
 public class UniversityTasks {
@@ -6,6 +7,7 @@ public class UniversityTasks {
     public static int playerY = 1;
     public static int floor = 0;
     public static int torch = 30;
+    public static boolean isGameRunning = true;
 
     public static char[][][] tower = {
 // === ЭТАЖ 0: "Обрыв" (5x6) ===
@@ -35,9 +37,14 @@ public class UniversityTasks {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("w/s/a/d ");
-        while (true) {
+        while (isGameRunning) {
             printHud();
             printFloor();
+
+            if (torch <= 0){
+                System.out.print("кажется факел потух и надежда угасла с ним ");
+                break;
+            }
 
             String input = scanner.nextLine().toLowerCase();
             if (input.isEmpty()) continue;
@@ -48,59 +55,47 @@ public class UniversityTasks {
             else{
                 handleMove(cmd);
             }
-            if (torch == 0){
-                System.out.print("кажется факел потух и надежда угасла с ним ");
-                break;
-            }
         }
     }
 
     public static void handleMove(char dir){
 
-        if (playerY < 0 || playerY >= tower[floor].length ||
-            playerX < 0 || playerX >= tower[floor][playerY].length ||
-            floor < 0 || floor >= tower.length){
+        int demoX = playerX;
+        int demoY = playerY;
+
+        switch (dir){
+            case 'w': demoY--; break;
+            case 'a': demoX--; break;
+            case 's': demoY++; break;
+            case 'd': demoX++; break;
+            default: return;
+        }
+        if (demoY < 0 || demoY >= tower[floor].length ||
+            demoX < 0 || demoX >= tower[floor][demoY].length){
             System.out.println("за пределы");
             return;
         }
+        char targetTile = tower[floor][demoY][demoX];
+        if (targetTile == '#'){
+            System.out.println("вы ударились о стену ");
+        }
+        else if (targetTile == 'X') {
+            System.out.println("вы ударяетесь о барьер ");
+        }
+        else {
+            playerX = demoX;
+            playerY = demoY;
+            torch--;
 
-        char playerPosition = 'P';
-        int nextStepSign = tower[floor][playerY][playerX];
-        char oldChar = 'P';
-        char newChar = '_';
-        switch (dir){
-            case 'w':
-                System.out.println('w');
-                if (tower[floor][playerY - 1][playerX] != '#') {
-                    playerY -= 1;
-                    torch--;
-                    positionCheck(tower);
-                }
-                break;
-            case 'a':
-                System.out.println('a');
-                if (tower[floor][playerY][playerX - 1] != '#') {
-                    playerX -= 1;
-                    torch--;
-                    positionCheck(tower);
-                }
-                break;
-            case 's':
-                System.out.println('s');
-                if (tower[floor][playerY + 1][playerX] != '#') {
-                    playerY += 1;
-                    torch--;
-                    positionCheck(tower);
-                }
-                break;
-            case 'd':
-                System.out.println('d');
-                if (tower[floor][playerY ][playerX + 1] != '#') {
-                    playerX += 1;
-                    torch--;
-                    positionCheck(tower);
-                }
-                break;
+            if (targetTile == '+'){
+                torch += 10;
+                tower[floor][playerY][playerX] = '_';
+                System.out.println("вы подобрали масло");
+            }
+            if (targetTile == 'F'){
+                System.out.println("вы добрались до финиша");
+                isGameRunning = false;
+            }
         }
     }
 
@@ -110,32 +105,32 @@ public class UniversityTasks {
 
         String input = scanner.nextLine().toLowerCase();
         if (input.isEmpty()) return;
+
         char dir = input.charAt(0);
+
         int demoX = playerX;
         int demoY = playerY;
+
         switch (dir){
             case 'w': demoY--; break;
             case 's': demoY++; break;
             case 'a': demoX--; break;
             case 'd': demoX++; break;
         }
-        if (demoY < 0 || demoY > tower[floor].length ||
-            demoX < 0 || demoX > tower[floor][demoY].length){
 
-            System.out.print("за границей");
+        if (demoY < 0 || demoY >= tower[floor].length ||
+            demoX < 0 || demoX >= tower[floor][demoY].length){
+            System.out.println("за границей");
+            return;
         }
+
         char tile = tower[floor][demoY][demoX];
+
         if (tile == 'U'){
             floor++;
             playerX = demoX;
             playerY = demoY;
             System.out.println("вы поднялись на этаж " + floor);
-        }
-        if (tile == '+'){
-            playerY = demoY;
-            playerX = demoX;
-            torch = torch + 10;
-            System.out.println("вы подобрали факел, заряд увеличился на 10 ");
         }
         else if (tile == 'D'){
             floor--;
@@ -146,8 +141,6 @@ public class UniversityTasks {
         else{
             System.out.println("у нас нет лестницы");
         }
-
-
     }
 
     public static void positionCheck(char[][][] tower){
@@ -156,6 +149,7 @@ public class UniversityTasks {
         if (nextStepSign == '#') {
             System.out.println("стена");
         }
+
         if (nextStepSign == '_') {
             System.out.println("шаг");
         }
