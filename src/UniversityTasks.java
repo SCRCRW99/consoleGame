@@ -8,6 +8,7 @@ public class UniversityTasks {
     public static int floor = 0;
     public static int torch = 30;
     public static boolean isGameRunning = true;
+    public static int durability = 3;
 
     public static String playerClass = "";
 
@@ -15,7 +16,7 @@ public class UniversityTasks {
 // === ЭТАЖ 0: "Обрыв" (5x6) ===
             {
                     {'#', '#', '#', '#', '_', '_'},
-                    {'#', '_', '_', '_', '_', '_'},
+                    {'#', 'P', '_', '_', '_', '_'},
                     {'#', '_', '_', 'U', '_', '_'},
                     {'#', '_', '_', '_', '_', '_'},
                     {'#', '_', '_', '_', '_', '_'}
@@ -47,44 +48,166 @@ public class UniversityTasks {
         String choice = scanner.nextLine();
 
         switch (choice){
-            case "1": playerClass = "Rogue"; break;
-            case "2": playerClass = "Brute"; break;
-            case "3": playerClass = "Shadow"; break;
+            case "1": playerClass = "Rogue"; System.out.println("вы играете за " + playerClass); System.out.println("у вас есть ключ. Вы можете использовать его на букву 'K' чтобы открыть барьер"); break;
+            case "2": playerClass = "Brute"; System.out.println("вы играете за " + playerClass); System.out.println("вам дали кирку. Использовать ее можно на букву 'B' но помните что у нее есть прочность и она может сломаться (изначально она равна 3)"); break;
+            case "3": playerClass = "Shadow"; System.out.println("вы играете за " + playerClass); break;
             default: playerClass = "Rogue";
                 System.out.println("вы ввели неверный класс, вам дали класс взломщика (по умолчанию)");
         }
-        System.out.println("вы играете за " + playerClass);
 
-        System.out.print("w/s/a/d ");
+
+
+        tower[floor][playerY][playerX] = '_';
+
+        System.out.print("передвижение на w/s/a/d ");
         while (isGameRunning) {
             printHud();
             printFloor();
+
 
             if (torch <= 0){
                 System.out.print("кажется факел потух и надежда угасла с ним ");
                 break;
             }
 
+
             String input = scanner.nextLine().toLowerCase();
             if (input.isEmpty()) continue;
             char cmd = input.charAt(0);
+
             if (cmd == 'e') {
                 handleAction(scanner);
             }
-            else if (cmd == 'k' || cmd == 'b' || cmd == 'j'){
+            else if (cmd == 'k'){
+                theRogue(scanner);
             }
-
+            else if (cmd == 'b'){
+                theBrute(scanner);
+            }
+            else if (cmd == 'j') {
+                theShadow(scanner);
+            }
             else{
                 handleMove(cmd);
             }
         }
     }
 
-    public static void handleAbility(Scanner scanner, char cmd){
+    public static void theRogue(Scanner scanner){
+
+        System.out.println("в какую сторону использовать? ");
+
+        int demoX = playerX;
+        int demoY = playerY;
+
+
+        String input = scanner.nextLine().toLowerCase();
+        char dir = input.charAt(0);
+
+        switch (dir){
+            case 'w': demoY--; break;
+            case 'a': demoX--; break;
+            case 's': demoY++; break;
+            case 'd': demoX++; break;
+            default: return;
+        }
+
+        if (demoY < 0 || demoY >= tower[floor].length ||
+            demoX < 0 || demoX >= tower[floor][demoY].length){
+            System.out.println("вы за пределами");
+            return;
+        }
+
+        char target = tower[floor][demoY][demoX];
+
+        if (target == 'X'){
+            System.out.println("вы открываете барьер");
+            playerX = demoX;
+            playerY = demoY;
+            torch -= 5;
+        }
+
         // проверить соответствие класса с командой
         // получить направление и в какую сторону она активируется
         // если класс, то соответствующие действия
     }
+     public static void theBrute(Scanner scanner){
+        String input = scanner.nextLine().toLowerCase();
+        char dir = input.charAt(0);
+
+        int demoY = playerY;
+        int demoX = playerX;
+
+        switch (dir){
+            case 'w': demoY--; break;
+            case 'a': demoX--; break;
+            case 's': demoY++; break;
+            case 'd': demoX++; break;
+            default: return;
+        }
+
+        if (demoY < 0 || demoY >= tower[floor].length
+            || demoX < 0 || demoX >= tower[floor][demoY].length){
+            System.out.println("вы за пределами");
+        }
+
+        char target = tower[floor][demoY][demoX];
+
+        if (target == '#' || target == 'X'){
+
+            System.out.println("вы сломали препятствие");
+            playerX = demoX;
+            playerY = demoY;
+            durability -= 1;
+            torch -= 3;
+            tower[floor][playerY][playerX] = '_';
+            System.out.println("у вас есть кирка, ее заряд = " + durability);
+        }
+
+        if (durability <= 0) {
+            System.out.println("упс кажется ваша кирка сломалась и вы больше не можете ей пользываться");
+
+        }
+
+     }
+
+     public static void theShadow(Scanner scanner){
+
+         String input = scanner.nextLine().toLowerCase();
+         char dir = input.charAt(0);
+
+         int demoX = playerX;
+         int demoY = playerY;
+
+         switch (dir){
+             case 'w': demoY -= 2; break;
+             case 'a': demoX -= 2; break;
+             case 's': demoY += 2; break;
+             case 'd': demoX += 2; break;
+             default:return;
+         }
+
+         if (demoY < 0 || demoY >= tower[floor].length
+             || demoX < 0 || demoX >= tower[floor][demoY].length){
+             System.out.println("вы за пределами");
+             return;
+         }
+
+         char target = tower[floor][demoY][demoX];
+
+         if (target == '_' || target == '+' || target == 'F'){
+             playerY = demoY;
+             playerX = demoX;
+         }
+         else {
+             System.out.println("вы не можете сюда прыгнуть");
+         }
+         if (target == 'F') {
+             System.out.println("вы добрались до финиша");
+            return;
+         }
+
+     }
 
     public static void handleMove(char dir){
 
