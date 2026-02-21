@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Scanner;
 
 public class MyGame {
@@ -20,10 +21,12 @@ public class MyGame {
     public static int playerX = 1;
     public static int playerY = 1;
     public static int floor = 0;
-    public static int torch = 50;
+    public static int torch = 37;
     public static int key = 0;
     public static int health = 100;
-    public static int heal = 25;
+    public static int bandage = 0;
+    public static int bleeding = 0;
+    public static boolean isBleeding = false;
     public static int hammer = 0;
     public static boolean isGameRunning = true;
     public static boolean Switch = false;
@@ -33,12 +36,12 @@ public class MyGame {
             {
                     {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
                     {'#', 'P', '.', '.', '#', '.', '.', '.', '.', '#'},
-                    {'#', '.', '#', '.', '#', '.', '#', '#', '.', '#'},
+                    {'#', '.', '#', '.', '#', '▬', '#', '#', '.', '#'},
                     {'#', '.', '#', 'U', '.', '.', '#', '+', '.', '#'},
                     {'#', '.', '#', '#', '#', '.', '#', '#', '.', '#'},
                     {'#', '.', '|', '.', '#', '.', '.', '.', '.', '#'},
                     {'#', '#', '#', '.', '#', '#', '#', '#', '.', '#'},
-                    {'#', '|', '.', '.', '.', '.', '.', '.', '+', '#'},
+                    {'#', '*', '|', '.', '.', '.', '.', '.', '+', '#'},
                     {'#', '♥', '#', '#', '#', '#', '.', '#', '.', '#'},
                     {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}
             },
@@ -50,9 +53,9 @@ public class MyGame {
                     {'#', '.', '#', '=', '#', '.', '#', '#', '.', '#'},
                     {'#', '.', '#', 'D', '.', '.', '#', 'U', '.', '#'},
                     {'#', '.', '#', '#', '#', '.', '#', '#', '=', '#'},
-                    {'#', '.', '.', '.', '#', '.', '.', '.', '.', '#'},
+                    {'#', '▬', '.', '.', '#', '.', '.', '.', '.', '#'},
                     {'#', '#', '#', '.', '#', '#', '#', '#', '.', '#'},
-                    {'#', '♥', '.', '.', '=', '.', '.', '|', '.', '#'},
+                    {'#', '♥', '|', '.', '=', '.', '.', '|', '.', '#'},
                     {'#', '+', '#', '#', '#', '#', 'K', '#', '.', '#'},
                     {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}
             },
@@ -66,7 +69,7 @@ public class MyGame {
                     {'#', '.', '#', '#', '#', '.', '#', '#', '.', '#'},
                     {'#', 'U', '|', '.', '#', '=', '.', '.', '.', '#'},
                     {'#', '#', '#', '.', '#', '#', '#', '#', '.', '#'},
-                    {'#', '.', '=', '+', '.', 'B', '.', '.', 'B', '#'},
+                    {'#', '▬', '=', '+', '.', 'B', '.', '.', 'B', '#'},
                     {'#', '+', '#', '#', '#', '#', 'F', '#', '.', '#'},
                     {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}
             },
@@ -74,7 +77,7 @@ public class MyGame {
             // ========== ЭТАЖ 3 (СКЛЕП) ==========
             {
                     {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
-                    {'#', '.', '.', '.', '#', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '#', '.', '▬', '.', '.', '#'},
                     {'#', '.', '#', '.', '#', '=', '#', '#', '.', '#'},
                     {'#', '.', '#', '+', '=', '=', '#', '.', '.', '#'},
                     {'#', '.', '#', '#', '#', 'K', '#', '#', '.', '#'},
@@ -104,21 +107,16 @@ public class MyGame {
                 System.out.println("вы проиграли, факел потух");
                 isGameRunning = false;
             }
-            if (health < 100){
-                torch--;
-            }
-            if (health < 75) {
-                torch--;
-            }
-            if (health < 50) {
-                torch--;
-            }
-            if (health < 25) {
+            if (health < 100) {
                 torch--;
             }
             if (health <= 0) {
                 System.out.println("вы разбились");
                 isGameRunning = false;
+            }
+            if (isBleeding == true){
+                bleeding++;
+                health -= bleeding;
             }
         }
     }
@@ -171,17 +169,11 @@ public class MyGame {
         if (target == 'X') {
             System.out.println("кажется... что-то щелкнуло... и подало электричество на двери");
             Switch = true;
-            playerX = demoX;
-            playerY = demoY;
             dungeonMap[floor][demoY][demoX] = '.';
         }
         if (target == '|' && Switch != true) {
             System.out.println("вам нужно включить рубильник");
             return;
-        }
-        if (target == '|' && Switch == true) {
-            System.out.println("вы открыли дверь");
-            dungeonMap[floor][demoY][demoX] = '.';
         }
 
         if (target == '=' && hammer > 0){
@@ -194,12 +186,30 @@ public class MyGame {
             key--;
             dungeonMap[floor][demoY][demoX] = '.';
         }
+        if (key <= 0 && target == 'B'){
+            System.out.println("у вас нет ключа");
+            return;
+        }
+        if (hammer <= 0 && target == '='){
+            System.out.println("у вас нет молотка");
+            return;
+        }
+        if (target == '▬'){
+            bandage++;
+            System.out.println("вы подобрали бинт");
+            dungeonMap[floor][demoY][demoX] = '.';
+            isBleeding = false;
+        }
+
     }
 
     public static void handleMove(char dir){
+        Random random = new Random();
+        int counter = random.nextInt(0,2);
 
         int demoX = playerX;
         int demoY = playerY;
+
 
         switch (dir){
             case 'w': demoY--; break;
@@ -214,19 +224,23 @@ public class MyGame {
 
         char target = dungeonMap[floor][demoY][demoX];
 
+        if (target == '|'){
+            System.out.println("вы открыли дверь");
+        }
+
         if (target == '#'){
             System.out.println("вы ударились об стену");
             return;
         }
         if (target == '+') {
             torch += 10;
-            System.out.println("вы подобрали факел его заряд =" + torch);
+            System.out.println("вы подобрали факел его заряд = " + torch);
             dungeonMap[floor][demoY][demoX] = '.';
             playerX = demoX;
             playerY = demoY;
         }
         if (target == '♥') {
-            health += 25;
+            health += 50;
             System.out.println("вы подобрали здоровье, осталось" + health);
             dungeonMap[floor][demoY][demoX] = '.';
             playerY = demoY;
@@ -236,13 +250,35 @@ public class MyGame {
         if (target == '='){
             floor--;
             System.out.println("вы наступили на прогнившую доску и упали на этаж ниже");
-            System.out.println("вы вывернули ногу потеряв 20% здоровья");
-            health -= 25;
+            if (counter == 0){
+                System.out.println("вы вывернули ногу потеряв 50% здоровья");
+                health -= 50;
+            }
+            if (counter == 1) {
+                System.out.println("вы наступили на доску с ржавым гвоздем и провалились вниз, кажется вам повезло и гвоздь смягчил падение");
+                System.out.println("вы не потеряли здоровье от падения, но получили кровотечение");
+                isBleeding = true;
+
+            }
         }
 
         if (target == 'F'){
             System.out.println("вы убежали из особняка");
             isGameRunning = false;
+        }
+        if (target == 'B' && key <= 0){
+            System.out.println("вы не можете пройти в эту дверь пока не подберете ключ!!!");
+            return;
+        }
+        if (target == '|' && Switch == false){
+            System.out.println("вам нужно переключить рубильник");
+            return;
+        }
+
+        if (target == '*'){
+            System.out.println("вы подобрали большой кувшин масла");
+            torch += 20;
+            System.out.println("заряд факела прибавился на 20");
         }
 
         playerX = demoX;
