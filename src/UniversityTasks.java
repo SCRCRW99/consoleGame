@@ -189,7 +189,7 @@ public class UniversityTasks {
             case 'd': demoX++; break;
             default: return;
         }
-        if (!isValidMove(demoX,demoY)){
+        if (!isValidMove(demoY,demoX)){
             return;
         }
         char targetTile = tower[floor][demoY][demoX];
@@ -235,7 +235,7 @@ public class UniversityTasks {
             case 'd': demoX++; break;
         }
 
-        if (!isValidMove(demoX,demoY)){
+        if (!isValidMove(demoY,demoX)){
             return;
         }
 
@@ -259,7 +259,7 @@ public class UniversityTasks {
         }
     }
 
-    public static boolean isValidMove(int x, int y){
+    public static boolean isValidMove(int y, int x){
         if (y < 0 || y >= tower[floor].length || x < 0 || x >= tower[floor][y].length){
             System.out.println("вы за пределами");
             return false;
