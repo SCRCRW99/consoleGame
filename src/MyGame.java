@@ -21,15 +21,19 @@ public class MyGame {
     public static int playerX = 1;
     public static int playerY = 1;
     public static int floor = 0;
+    public static boolean validTorch = false;
     public static int torch = 37;
     public static int key = 0;
-    public static int health = 99;
+    public static int health = 100;
     public static int bandage = 0;
     public static int bleeding = 0;
     public static boolean isBleeding = false;
     public static int hammer = 0;
     public static boolean isGameRunning = true;
     public static boolean powerSwitch = false;
+    public static boolean isEntityMove = false;
+    public static int monsterY = 1;
+    public static int monsterX = 1;
 
     public static char[][][] dungeonMap = {
             // ========== ЭТАЖ 0 (ПОДВАЛ) ==========
@@ -42,7 +46,7 @@ public class MyGame {
                     {'#', '.', '|', '.', '#', '.', '.', '.', '.', '#'},
                     {'#', '#', '#', '.', '#', '#', '#', '#', '.', '#'},
                     {'#', '*', '|', '.', '.', '.', '.', '.', '+', '#'},
-                    {'#', '♥', '#', '#', '#', '#', '.', '#', '.', '#'},
+                    {'#', '♥', '#', '#', '#', '#', 'F', '#', '.', '#'},
                     {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}
             },
 
@@ -86,14 +90,33 @@ public class MyGame {
                     {'#', '+', '=', '.', '.', '.', '.', '.', '.', '#'},
                     {'#', '.', '#', '#', '#', '#', '.', '#', '.', '#'},
                     {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}
+            },
+            {
+                    {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                    {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}
             }
+
     };
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         dungeonMap[floor][playerY][playerX] = '.';
         while (isGameRunning) {
             HUD();
-            printFloor();
+
+            if (isGameRunning){
+                printFloor();
+            }
+            if (isEntityMove){
+                Monster();
+            }
             System.out.print("введите действие: ");
             String input = scanner.next().toLowerCase();
             if (input.isEmpty()) continue;
@@ -102,6 +125,7 @@ public class MyGame {
             if (cmd == 'e'){
                 System.out.print("введите направление: ");
                 handleAction(scanner);
+                torch++;
             }
             if (torch <= 0){
                 System.out.println("вы проиграли, факел потух");
@@ -109,7 +133,6 @@ public class MyGame {
             }
             if (health < 100) {
                 torch--;
-                // исправить факел
             }
             if (health == 0) {
                 System.out.println("вы разбились");
@@ -121,6 +144,9 @@ public class MyGame {
             if (health < 0){
                 System.out.println("вы истекли кровью");
                 isGameRunning = false;
+            }
+            if (health < 100){
+                validTorch = true;
             }
 
         }
@@ -274,6 +300,11 @@ public class MyGame {
             }
         }
 
+        else if (demoX == 6 && demoY == 8 && floor == 0){
+            System.out.println("вы попали в логово монстра");
+            floor = 4;
+            isEntityMove = true;
+        }
         else if (target == 'F'){
             System.out.println("вы убежали из особняка");
             isGameRunning = false;
@@ -290,10 +321,10 @@ public class MyGame {
             System.out.println("заряд факела прибавился на 20");
         }
 
+
         playerX = demoX;
         playerY = demoY;
         torch--;
-
     }
 
     public static boolean isValidMove(int x, int y){
@@ -326,7 +357,29 @@ public class MyGame {
             }
 
         }
+        public static void Monster (){
+
+        Random random = new Random();
+
+        char[][] currentFloor = dungeonMap[floor];
+        for (int i = 0; i < currentFloor.length; i++){
+            for (int j = 0; j < currentFloor[i].length; j++){
+                monsterY = random.nextInt(2,7);
+                monsterX = random.nextInt(2,7);
+                if (i == monsterY && j == monsterX){
+                    System.out.print("☻ ");
+                }
+                if (i == playerY && j == playerX){
+                    System.out.print("P ");
+                }
+                else {
+                    System.out.print(currentFloor[i][j] + " ");
+                }
+            }
+            System.out.println();
+        }
     }
+}
 
 // ЛЕГЕНДА:
 // '#' - стена (непроходимо)
