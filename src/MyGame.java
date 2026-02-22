@@ -23,13 +23,13 @@ public class MyGame {
     public static int floor = 0;
     public static int torch = 37;
     public static int key = 0;
-    public static int health = 100;
+    public static int health = 99;
     public static int bandage = 0;
     public static int bleeding = 0;
     public static boolean isBleeding = false;
     public static int hammer = 0;
     public static boolean isGameRunning = true;
-    public static boolean Switch = false;
+    public static boolean powerSwitch = false;
 
     public static char[][][] dungeonMap = {
             // ========== ЭТАЖ 0 (ПОДВАЛ) ==========
@@ -109,15 +109,20 @@ public class MyGame {
             }
             if (health < 100) {
                 torch--;
+                // исправить факел
             }
-            if (health <= 0) {
+            if (health == 0) {
                 System.out.println("вы разбились");
                 isGameRunning = false;
             }
-            if (isBleeding == true){
-                bleeding++;
-                health -= bleeding;
+            if (isBleeding){
+                health -= ++bleeding;
             }
+            if (health < 0){
+                System.out.println("вы истекли кровью");
+                isGameRunning = false;
+            }
+
         }
     }
 
@@ -162,16 +167,15 @@ public class MyGame {
             dungeonMap[floor][demoY][demoX] = '.';
         }
         if (target == 'K') {
-            key += 1;
+            key++;
             System.out.println("вы подобрали ключ, его заряд равен: " + key + " вы можете открывать тяжелые двери");
             dungeonMap[floor][demoY][demoX] = '.';
         }
         if (target == 'X') {
             System.out.println("кажется... что-то щелкнуло... и подало электричество на двери");
-            Switch = true;
-            dungeonMap[floor][demoY][demoX] = '.';
+            powerSwitch = true;
         }
-        if (target == '|' && Switch != true) {
+        if (target == '|' && !powerSwitch) {
             System.out.println("вам нужно включить рубильник");
             return;
         }
@@ -199,6 +203,7 @@ public class MyGame {
             System.out.println("вы подобрали бинт");
             dungeonMap[floor][demoY][demoX] = '.';
             isBleeding = false;
+            bleeding /= 2;
         }
 
     }
@@ -224,30 +229,37 @@ public class MyGame {
 
         char target = dungeonMap[floor][demoY][demoX];
 
+
         if (target == '|'){
-            System.out.println("вы открыли дверь");
+            if (!powerSwitch){
+                System.out.println("вам нужно включить рубильник");
+                return;
+            }
+            else {
+                System.out.println("вы открыли дверь");
+            }
         }
 
-        if (target == '#'){
+        else if (target == '#'){
             System.out.println("вы ударились об стену");
             return;
         }
-        if (target == '+') {
+        else if (target == '+') {
             torch += 10;
             System.out.println("вы подобрали факел его заряд = " + torch);
             dungeonMap[floor][demoY][demoX] = '.';
             playerX = demoX;
             playerY = demoY;
         }
-        if (target == '♥') {
+        else if (target == '♥') {
             health += 50;
             System.out.println("вы подобрали здоровье, осталось" + health);
             dungeonMap[floor][demoY][demoX] = '.';
-            playerY = demoY;
             playerX = demoX;
+            playerY = demoY;
         }
 
-        if (target == '='){
+        else if (target == '='){
             floor--;
             System.out.println("вы наступили на прогнившую доску и упали на этаж ниже");
             if (counter == 0){
@@ -262,20 +274,17 @@ public class MyGame {
             }
         }
 
-        if (target == 'F'){
+        else if (target == 'F'){
             System.out.println("вы убежали из особняка");
             isGameRunning = false;
         }
-        if (target == 'B' && key <= 0){
+        else if (target == 'B' && key <= 0){
             System.out.println("вы не можете пройти в эту дверь пока не подберете ключ!!!");
             return;
         }
-        if (target == '|' && Switch == false){
-            System.out.println("вам нужно переключить рубильник");
-            return;
-        }
 
-        if (target == '*'){
+
+        else if (target == '*'){
             System.out.println("вы подобрали большой кувшин масла");
             torch += 20;
             System.out.println("заряд факела прибавился на 20");
@@ -284,7 +293,6 @@ public class MyGame {
         playerX = demoX;
         playerY = demoY;
         torch--;
-
 
     }
 
